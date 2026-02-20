@@ -1,27 +1,22 @@
 # Implied Volatility Computation
 
-Numerical estimation of Black–Scholes implied volatility using 
-Bisection and Newton–Raphson methods.
+Numerical estimation of Black–Scholes implied volatility using **Bisection** and **Newton–Raphson** methods.
 
 ---
 
 ## Overview
 
-This repository implements and compares two root-finding algorithms for 
-computing implied volatility from observed market option prices:
+This repository implements and compares two root-finding algorithms for computing implied volatility from observed market option prices:
 
-- Newton–Raphson method (fast, derivative-based)
-- Bisection method (robust, bracket-based)
+- **Newton–Raphson** (fast, derivative-based)
+- **Bisection** (robust, bracket-based)
 
 Given a market price $C_{mkt}$, we solve:
 
-$$
-BS(\sigma) - C_{mkt} = 0
-$$
+$$BS(\sigma) - C_{mkt} = 0$$
 
-where $BS(\sigma)$ is the Black–Scholes price as a function of volatility.
-
-The solution $\sigma^*$ is the implied volatility.
+where $BS(\sigma)$ is the Black–Scholes price as a function of volatility.  
+The solution $\sigma^*$ is the **implied volatility**.
 
 ---
 
@@ -29,73 +24,61 @@ The solution $\sigma^*$ is the implied volatility.
 
 Under the Black–Scholes framework, the European call price is:
 
-$$
-C = S_0 e^{-qT} N(d_1) - K e^{-rT} N(d_2)
-$$
+$$C = S_0 e^{-qT} N(d_1) - K e^{-rT} N(d_2)$$
 
 Implied volatility does not admit a closed-form solution, so we compute it numerically.
 
 ---
 
-### Newton–Raphson Method
+## Newton–Raphson Method
 
-We define:
+We compute implied volatility by solving:
 
-$$
-f(\sigma) = BS(\sigma) - C_{mkt}
-$$
+$$f(\sigma) = BS(\sigma) - C_{mkt} = 0$$
 
-The update rule is:
+Newton–Raphson uses the slope of the pricing function to jump toward the root:
 
-$$
-\sigma_{n+1} = \sigma_n - 
-\frac{f(\sigma_n)}{f'(\sigma_n)}
-$$
+$$\sigma_{n+1} = \sigma_n - \frac{BS(\sigma_n) - C_{mkt}}{\mathrm{Vega}(\sigma_n)}$$
 
 In the Black–Scholes model:
 
-$$
-f'(\sigma) = \text{Vega}(\sigma)
-$$
+$$\mathrm{Vega}(\sigma) = S_0 e^{-qT}\,\phi(d_1)\sqrt{T}$$
 
-with
-
-$$
-\text{Vega} = S_0 e^{-qT} \phi(d_1) \sqrt{T}
-$$
-
-Newton–Raphson has quadratic convergence when vega is sufficiently large.
+**What it does:** Adjusts volatility using the pricing error scaled by sensitivity (vega).  
+**Key property:** Quadratic convergence when vega is sufficiently large.  
+**Limitation:** Can become unstable when vega is small (deep ITM/OTM options).
 
 ---
 
-### Bisection Method
+## Bisection Method
 
-We search for a root in an interval $[\sigma_L, \sigma_H]$ such that:
+We search for $\sigma$ inside a bracket $[\sigma_L, \sigma_H]$ such that:
 
-$$
-f(\sigma_L) f(\sigma_H) < 0
-$$
+$$f(\sigma_L)\,f(\sigma_H) < 0$$
 
-The midpoint is iteratively updated until convergence.
+At each iteration, we update the midpoint:
 
-Bisection guarantees convergence provided a valid bracket exists, 
-but converges linearly.
+$$\sigma_{\mathrm{mid}} = \frac{\sigma_L + \sigma_H}{2}$$
+
+**What it does:** Shrinks an interval guaranteed to contain the root.  
+**Key property:** Convergence is guaranteed if a valid bracket exists.  
+**Limitation:** Linear convergence → slower than Newton–Raphson.
 
 ---
 
 ## Method Comparison
 
 | Method | Convergence | Speed | Robustness |
-|--------|------------|--------|------------|
-| Bisection | Linear | Slower | Always converges if bracket exists |
+|--------|------------|-------|------------|
+| Bisection | Linear | Slower | Converges if bracket exists |
 | Newton–Raphson | Quadratic | Very fast | May fail if vega is small |
 
 ---
 
 ## Practical Insights
 
-- Newton–Raphson performs best for ATM options (where vega is large).
-- Deep ITM/OTM options may produce small vega → instability.
+- Newton–Raphson performs best for ATM options (high vega).
+- Deep ITM/OTM options can produce small vega → instability.
 - Safeguards (vega threshold, iteration cap) improve stability.
 
 ---
@@ -106,14 +89,13 @@ but converges linearly.
 - Explicit volatility bracketing
 - Adaptive bracket expansion
 - Vega threshold safeguard
-- Clean modular Black–Scholes pricing and vega functions
+- Modular Black–Scholes pricing and vega functions
 
 ---
 
 ## References
 
-
--Capinski, M. J., & Zastawniak, T. (2012). *Numerical Methods in Finance with C++*. Cambridge University Press.
+- Capinski, M. J., & Zastawniak, T. (2012). *Numerical Methods in Finance with C++*. Cambridge University Press.
 - Hull, J. C. (2018). *Options, Futures, and Other Derivatives* (10th ed.). Pearson.
-- Manaster, S., & Koehler, G. (1982). The Calculation of Implied Variances from the Black–Scholes Model: A Note. *Journal of Finance*. :contentReference[oaicite:0]{index=0}
-- Orlando, G., Mininni, R. M., & Bufalo, M. (2017). A review on implied volatility calculation. *Journal of Computational and Applied Mathematics*. :contentReference[oaicite:1]{index=1}
+- Manaster, S., & Koehler, G. (1982). The Calculation of Implied Variances from the Black–Scholes Model: A Note. *Journal of Finance*.
+- Orlando, G., Mininni, R. M., & Bufalo, M. (2017). A review on implied volatility calculation. *Journal of Computational and Applied Mathematics*.
