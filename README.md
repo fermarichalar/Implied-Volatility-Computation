@@ -1,6 +1,9 @@
 # Implied Volatility Computation
 
-Numerical estimation of Black–Scholes implied volatility using **Bisection** and **Newton–Raphson** methods. A more detailed derivation and implementation can be found in the accompanying Jupyter notebook.
+Numerical estimation of Black–Scholes implied volatility using **Bisection** and **Newton–Raphson** methods. 
+
+A more detailed derivation and implementation can be found in the accompanying Jupyter notebook.
+
 ---
 
 ## Overview
